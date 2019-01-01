@@ -1,7 +1,7 @@
 # RAMP starting kit on Hard drive failure
 
 
-_Authors: Salma Jeridi, Aymen Dabghi, Aymen MTIBAA, Ahmed Akakzia
+_Authors: Salma Jeridi, Aymen Dabghi, Aymen MTIBAA, Ahmed Akakzia_
 
 Description
 
