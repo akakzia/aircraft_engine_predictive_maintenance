@@ -1,6 +1,5 @@
 # RAMP starting kit on Hard drive failure
 
-[![Build Status](https://travis-ci.org/ramp-kits/solar_wind.svg?branch=master)](https://travis-ci.org/ramp-kits/solar_wind)
 
 _Authors: Salma Jeridi, Aymen Dabghi, Aymen MTIBAA, Ahmed Akakzia
 
