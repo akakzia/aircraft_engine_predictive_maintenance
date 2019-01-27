@@ -1,7 +1,7 @@
-# RAMP starting kit on Hard drive failure
+# RAMP starting kit on Aircraft Engine Run-to-Failure
 
 
-_Authors: Salma Jeridi, Aymen Dabghi, Aymen MTIBAA, Ahmed Akakzia_
+_Authors: Salma JERIDI, Aymen DABGHI, Aymen MTIBAA, Ahmed AKAKZIA_
 
 Description
 
