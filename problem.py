@@ -37,6 +37,7 @@ class MultiClassLogLoss(BaseScoreType):
         score = log_loss(y_true[:, 1:], y_pred[:, 1:])
         return score
 
+
 class WeightedPrecision(ClassifierBaseScoreType):
     is_lower_the_better = False
     minimum = 0.0
@@ -51,6 +52,7 @@ class WeightedPrecision(ClassifierBaseScoreType):
         class_score = precision_score(y_true_label_index, y_pred_label_index, average=None)
         score = np.sum(class_score * self.weights)
         return score
+
 
 class WeightedRecall(ClassifierBaseScoreType):
     is_lower_the_better = False
@@ -84,6 +86,7 @@ class MacroAveragedF1(BaseScoreType):
         prec = self.weighted_precision(y_true, y_pred)
         return 2 * (prec * rec) / (prec + rec + 10 ** -15)
 
+
 class Mixed(BaseScoreType):
     is_lower_the_better = True
     minimum = 0.0
@@ -100,6 +103,7 @@ class Mixed(BaseScoreType):
         ll = self.multi_class_log_loss(y_true, y_pred)
         return ll + (1 - f1)
 
+
 score_types = [
     # mixed log-loss/f1 score
     Mixed(),
@@ -115,27 +119,8 @@ score_types = [
 
 
 def _read_data(path, type_):
-
     fname1 = '{}_FD001.txt'.format(type_)
     fname2 = '{}_FD003.txt'.format(type_)
-
-    if (type_ == 'test'):
-        fname1_rul = 'RUL_FD001.txt'
-        fname2_rul = 'RUL_FD003.txt'
-        fp1_rul = os.path.join(path, 'data', fname1_rul)
-        fp2_rul = os.path.join(path, 'data', fname2_rul)
-
-        df1_rul = pd.read_csv(fp1_rul, sep=' ', header=None)
-        df2_rul = pd.read_csv(fp2_rul, sep=' ', header=None)
-
-        df1_rul.drop([1], axis=1, inplace=True)
-        df2_rul.drop([1], axis=1, inplace=True)
-
-        df1_rul.reset_index(level=0, inplace=True)
-        df2_rul.reset_index(level=0, inplace=True)
-
-        ttf_valid.columns = ['ID', 'ttf']
-        ttf_valid['ID'] += 1
 
     fp1 = os.path.join(path, 'data', fname1)
     fp2 = os.path.join(path, 'data', fname2)
