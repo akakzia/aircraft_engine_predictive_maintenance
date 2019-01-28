@@ -36,6 +36,19 @@ def _read_data(path, type_):
 
     df1 = pd.read_csv(fp1, sep=' ', header=None)
     df2 = pd.read_csv(fp2, sep=' ', header=None)
+    if type_ == 'test':
+        labels1 = 'RUL_FD001.txt'
+        plabels1 = os.path.join(path, 'data', labels1)
+        labels2 = 'RUL_FD003.txt'
+        plabels2 = os.path.join(path, 'data', labels2)
+        target_test1 = pd.read_csv(plabels1, sep=' ', header=None)
+        target_test2 = pd.read_csv(plabels2, sep=' ', header=None)
+        target_test2.index = range(len(target_test1), len(target_test1) + len(target_test2))
+        target_test = pd.concat([target_test1, target_test2])
+        target_test.drop([1], axis=1, inplace=True)
+        target_test.reset_index(level=0, inplace=True)
+        target_test.columns = ['ID', 'ttf']
+        target_test['ID'] += 1
 
     #Merging data
     df2[0] = df2[0] + df1[0].max()
@@ -52,12 +65,21 @@ def _read_data(path, type_):
 
     ## TTF calculation
 
-    failure_cycle = pd.DataFrame(data.groupby('ID')['Cycle'].max())
-    failure_cycle.reset_index(level=0, inplace=True)
-    failure_cycle.columns = ['ID', 'ttf']
+    if type_ == 'train':
+        failure_cycle = pd.DataFrame(data.groupby('ID')['Cycle'].max())
+        failure_cycle.reset_index(level=0, inplace=True)
+        failure_cycle.columns = ['ID', 'ttf']
 
-    data_merged = pd.merge(data, failure_cycle, on='ID')
-    data_merged['ttf'] = data_merged['ttf'] - data_merged['Cycle']
+        data_merged = pd.merge(data, failure_cycle, on='ID')
+        data_merged['ttf'] = data_merged['ttf'] - data_merged['Cycle']
+
+    if type_ == 'test':
+        max_cycle = pd.DataFrame(data.groupby('ID')['Cycle'].max())
+        max_cycle.reset_index(level=0, inplace=True)
+        max_cycle.columns = ['ID', 'max_cycle']
+        data_merged = pd.merge(data, target_test, on='ID')
+        data_merged = pd.merge(data_merged, max_cycle, on='ID')
+        data_merged['ttf'] = data_merged['max_cycle'] - data_merged['Cycle'] + data_merged['ttf']
 
     ## labeling data
     data_merged['ttf'] = data_merged['ttf'].apply(lambda x: 0 if x <= 10 else 1 if x <= 30 else 2 if x <= 100 else 3)
