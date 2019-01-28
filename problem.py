@@ -19,6 +19,20 @@ problem_title = 'Predictive maintenance for aircraft engines'
 
 
 # -----------------------------------------------------------------------------
+# Worklow element
+# -----------------------------------------------------------------------------
+workflow = rw.workflows.FeatureExtractorClassifier()
+
+# -----------------------------------------------------------------------------
+# Predictions type
+# -----------------------------------------------------------------------------
+_target_column_name = 'label'
+_prediction_label_names = [0, 1, 2, 3]
+
+Predictions = rw.prediction_types.make_multiclass(
+    label_names=_prediction_label_names)
+
+# -----------------------------------------------------------------------------
 # Score types
 # -----------------------------------------------------------------------------
 
