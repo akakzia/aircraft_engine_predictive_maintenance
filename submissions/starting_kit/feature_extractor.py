@@ -29,7 +29,8 @@ def _transform(X_df):
     X_df = rolling_std(X_df, 's11', 10)
     X_df = rolling_mean(X_df, 's11', 10)
 
-
+    # Deleting id to avoid order between engines
+    X_df.drop(['ID'], axis=1, inplace=True)
     return X_df
 
 

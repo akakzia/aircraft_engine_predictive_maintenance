@@ -13,11 +13,14 @@ from rampwf.score_types.base import BaseScoreType
 from rampwf.score_types.classifier_base import ClassifierBaseScoreType
 from rampwf.workflows.feature_extractor import FeatureExtractor
 from rampwf.workflows.classifier import Classifier
+from sklearn.model_selection import StratifiedShuffleSplit
 
 
 problem_title = 'Predictive maintenance for aircraft engines'
 
-
+#import os
+#target = 'starting_kit'
+#os.system('C:/Users/MTIBAA/Anaconda3/envs/test_env/Scripts/ramp_test_submission.exe --submission="%s"' % target)
 # -----------------------------------------------------------------------------
 # Worklow element
 # -----------------------------------------------------------------------------
@@ -127,6 +130,37 @@ score_types = [
     WeightedPrecision(),
     WeightedRecall(),
 ]
+
+
+# -----------------------------------------------------------------------------
+# Cross-validation scheme
+# -----------------------------------------------------------------------------
+
+
+# def get_cv(X, y):
+#     # using 5 folds as default
+#     k = 5
+#     # up to 10 fold cross-validation based on 5 splits, using two parts for
+#     # testing in each fold
+#     n_splits = 5
+#     cv = KFold(n_splits=n_splits)
+#     splits = list(cv.split(X, y))
+#     # 5 folds, each point is in test set 4x
+#     # set k to a lower number if you want less folds
+#     pattern = [
+#         ([2, 3, 4], [0, 1]), ([0, 1, 4], [2, 3]), ([0, 2, 3], [1, 4]),
+#         ([0, 1, 3], [2, 4]), ([1, 2, 4], [0, 3]), ([0, 1, 2], [3, 4]),
+#         ([0, 2, 4], [1, 3]), ([1, 2, 3], [0, 4]), ([0, 3, 4], [1, 2]),
+#         ([1, 3, 4], [0, 2])
+#     ]
+#     for ps in pattern[:k]:
+#         yield (np.hstack([splits[p][1] for p in ps[0]]),
+#                np.hstack([splits[p][1] for p in ps[1]]))
+
+def get_cv(X, y):
+    cv = StratifiedShuffleSplit(n_splits=8, test_size=0.2, random_state=57)
+    return cv.split(X, y)
+
 # -----------------------------------------------------------------------------
 # Training / testing data reader
 # -----------------------------------------------------------------------------
@@ -188,7 +222,7 @@ def _read_data(path, type_):
 
     ## labeling data
     data_merged['labels'] = data_merged['ttf'].apply(lambda x: 0 if x <= 10 else 1 if x <= 30 else 2 if x <= 100 else 3)
-    y = data_merged[['ID', 'labels']].set_index('ID')['labels']
+    y = data_merged['labels']
 
     # for the "quick-test" mode, use less data
     test = os.getenv('RAMP_TEST_MODE', 0)
