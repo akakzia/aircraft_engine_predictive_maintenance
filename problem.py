@@ -1,18 +1,12 @@
 from __future__ import division, print_function
 import os
-import datetime
-
-import warnings
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import KFold
 from sklearn.metrics import log_loss, recall_score, precision_score
-
+from sklearn.metrics import accuracy_score , classification_report
 import rampwf as rw
 from rampwf.score_types.base import BaseScoreType
 from rampwf.score_types.classifier_base import ClassifierBaseScoreType
-from rampwf.workflows.feature_extractor import FeatureExtractor
-from rampwf.workflows.classifier import Classifier
 from sklearn.model_selection import StratifiedShuffleSplit
 
 
@@ -51,7 +45,7 @@ class MultiClassLogLoss(BaseScoreType):
         self.precision = precision
 
     def __call__(self, y_true, y_pred):
-        score = log_loss(y_true[:, 1:], y_pred[:, 1:])
+        score = log_loss(y_true, y_pred)
         return score
 
 
@@ -101,6 +95,10 @@ class MacroAveragedF1(BaseScoreType):
     def __call__(self, y_true, y_pred):
         rec = self.weighted_recall(y_true, y_pred)
         prec = self.weighted_precision(y_true, y_pred)
+        print(classification_report(y_true, y_pred))
+
+        print("rec : ", rec)
+        print("prec : ", prec)
         return 2 * (prec * rec) / (prec + rec + 10 ** -15)
 
 
@@ -116,7 +114,9 @@ class Mixed(BaseScoreType):
         self.multi_class_log_loss = MultiClassLogLoss()
 
     def __call__(self, y_true, y_pred):
-        f1 = self.macro_averaged_f1(y_true, y_pred)
+        y_chap = np.zeros((y_pred.shape))
+        y_chap[np.arange(len(y_chap)), np.argmax(y_pred, axis=1)] = 1
+        f1 = self.macro_averaged_f1(y_true, y_chap)
         ll = self.multi_class_log_loss(y_true, y_pred)
         return ll + (1 - f1)
 
@@ -136,29 +136,8 @@ score_types = [
 # Cross-validation scheme
 # -----------------------------------------------------------------------------
 
-
-# def get_cv(X, y):
-#     # using 5 folds as default
-#     k = 5
-#     # up to 10 fold cross-validation based on 5 splits, using two parts for
-#     # testing in each fold
-#     n_splits = 5
-#     cv = KFold(n_splits=n_splits)
-#     splits = list(cv.split(X, y))
-#     # 5 folds, each point is in test set 4x
-#     # set k to a lower number if you want less folds
-#     pattern = [
-#         ([2, 3, 4], [0, 1]), ([0, 1, 4], [2, 3]), ([0, 2, 3], [1, 4]),
-#         ([0, 1, 3], [2, 4]), ([1, 2, 4], [0, 3]), ([0, 1, 2], [3, 4]),
-#         ([0, 2, 4], [1, 3]), ([1, 2, 3], [0, 4]), ([0, 3, 4], [1, 2]),
-#         ([1, 3, 4], [0, 2])
-#     ]
-#     for ps in pattern[:k]:
-#         yield (np.hstack([splits[p][1] for p in ps[0]]),
-#                np.hstack([splits[p][1] for p in ps[1]]))
-
 def get_cv(X, y):
-    cv = StratifiedShuffleSplit(n_splits=8, test_size=0.2, random_state=57)
+    cv = StratifiedShuffleSplit(n_splits=5, test_size=0.2, random_state=57)
     return cv.split(X, y)
 
 # -----------------------------------------------------------------------------
