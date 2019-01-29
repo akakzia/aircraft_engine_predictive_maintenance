@@ -187,8 +187,8 @@ def _read_data(path, type_):
         data_merged['ttf'] = data_merged['max_cycle'] - data_merged['Cycle'] + data_merged['ttf']
 
     ## labeling data
-    data_merged['ttf'] = data_merged['ttf'].apply(lambda x: 0 if x <= 10 else 1 if x <= 30 else 2 if x <= 100 else 3)
-    y = data_merged[['ID', 'ttf']].set_index('ID')['ttf']
+    data_merged['labels'] = data_merged['ttf'].apply(lambda x: 0 if x <= 10 else 1 if x <= 30 else 2 if x <= 100 else 3)
+    y = data_merged[['ID', 'labels']].set_index('ID')['labels']
 
     # for the "quick-test" mode, use less data
     test = os.getenv('RAMP_TEST_MODE', 0)
