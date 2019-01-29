@@ -9,8 +9,7 @@ class FeatureExtractor(object):
         return self
 
     def transform(self, X_df):
-        X_df_new = X_df.copy()
-        return _transform(X_df_new)
+        return _transform(X_df)
 
 
 def _transform(X_df):
@@ -30,8 +29,7 @@ def _transform(X_df):
     X_df = rolling_std(X_df, 's11', 10)
     X_df = rolling_mean(X_df, 's11', 10)
 
-    # Deleting id to avoid order between engines
-    X_df.drop(['ID'], axis=1, inplace=True)
+
     return X_df
 
 
@@ -56,7 +54,7 @@ def rolling_std(data, feature, cycle_window, center=True):
     ids = data.ID.unique()
     name = '_'.join([feature, str(cycle_window), 'std'])
     for i in ids:
-        sub_eng = data.loc[lambda df: df.ID == i, :]
+        sub_eng = data.loc[lambda df: df.ID == i, :].copy()
         sub_eng.loc[:, name] = sub_eng[feature].rolling(cycle_window, center=center).std()
         sub_eng.loc[:, name] = sub_eng[name].ffill().bfill()
         sub_eng.loc[:, name] = sub_eng[name].astype(sub_eng[feature].dtype)
@@ -85,7 +83,7 @@ def rolling_mean(data, feature, cycle_window, center=False):
     ids = data.ID.unique()
     name = '_'.join([feature, str(cycle_window), 'mean'])
     for i in ids:
-        sub_eng = data.loc[lambda df: df.ID == i, :]
+        sub_eng = data.loc[lambda df: df.ID == i, :].copy()
         sub_eng.loc[:, name] = sub_eng[feature].rolling(cycle_window, win_type='hamming', center=center).mean()
         sub_eng.loc[:, name] = sub_eng[name].ffill().bfill()
         sub_eng.loc[:, name] = sub_eng[name].astype(sub_eng[feature].dtype)
