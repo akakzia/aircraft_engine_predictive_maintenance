@@ -3,18 +3,14 @@ import os
 import numpy as np
 import pandas as pd
 from sklearn.metrics import log_loss, recall_score, precision_score
-from sklearn.metrics import accuracy_score , classification_report
 import rampwf as rw
 from rampwf.score_types.base import BaseScoreType
 from rampwf.score_types.classifier_base import ClassifierBaseScoreType
-from sklearn.model_selection import StratifiedShuffleSplit
+from sklearn.model_selection import  StratifiedKFold
 
 
 problem_title = 'Predictive maintenance for aircraft engines'
 
-#import os
-#target = 'starting_kit'
-#os.system('C:/Users/MTIBAA/Anaconda3/envs/test_env/Scripts/ramp_test_submission.exe --submission="%s"' % target)
 # -----------------------------------------------------------------------------
 # Worklow element
 # -----------------------------------------------------------------------------
@@ -23,7 +19,7 @@ workflow = rw.workflows.FeatureExtractorClassifier()
 # -----------------------------------------------------------------------------
 # Predictions type
 # -----------------------------------------------------------------------------
-_target_column_name = 'label'
+_target_column_name = 'labels'
 _prediction_label_names = [0, 1, 2, 3]
 
 Predictions = rw.prediction_types.make_multiclass(
@@ -40,7 +36,7 @@ class MultiClassLogLoss(BaseScoreType):
     minimum = 0.0
     maximum = np.inf
 
-    def __init__(self, name='pw_ll', precision=2):
+    def __init__(self, name='mc_ll', precision=2):
         self.name = name
         self.precision = precision
 
@@ -54,7 +50,7 @@ class WeightedPrecision(ClassifierBaseScoreType):
     minimum = 0.0
     maximum = 1.0
 
-    def __init__(self, name='pw_prec', precision=2):
+    def __init__(self, name='w_prec', precision=2):
         self.name = name
         self.precision = precision
         self.weights = [0.1, 0.2, 0.3, 0.4]
@@ -70,7 +66,7 @@ class WeightedRecall(ClassifierBaseScoreType):
     minimum = 0.0
     maximum = 1.0
 
-    def __init__(self, name='pw_rec', precision=2):
+    def __init__(self, name='w_rec', precision=2):
         self.name = name
         self.precision = precision
         self.weights = [0.5, 0.3, 0.1, 0.1]
@@ -95,10 +91,6 @@ class MacroAveragedF1(BaseScoreType):
     def __call__(self, y_true, y_pred):
         rec = self.weighted_recall(y_true, y_pred)
         prec = self.weighted_precision(y_true, y_pred)
-        print(classification_report(y_true, y_pred))
-
-        print("rec : ", rec)
-        print("prec : ", prec)
         return 2 * (prec * rec) / (prec + rec + 10 ** -15)
 
 
@@ -116,6 +108,7 @@ class Mixed(BaseScoreType):
     def __call__(self, y_true, y_pred):
         y_chap = np.zeros((y_pred.shape))
         y_chap[np.arange(len(y_chap)), np.argmax(y_pred, axis=1)] = 1
+
         f1 = self.macro_averaged_f1(y_true, y_chap)
         ll = self.multi_class_log_loss(y_true, y_pred)
         return ll + (1 - f1)
@@ -137,7 +130,7 @@ score_types = [
 # -----------------------------------------------------------------------------
 
 def get_cv(X, y):
-    cv = StratifiedShuffleSplit(n_splits=5, test_size=0.2, random_state=57)
+    cv = StratifiedKFold(n_splits=5,  random_state=57)
     return cv.split(X, y)
 
 # -----------------------------------------------------------------------------

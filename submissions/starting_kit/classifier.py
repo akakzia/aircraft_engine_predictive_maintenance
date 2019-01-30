@@ -1,13 +1,7 @@
-#import os
-#target = 'starting_kit'
-#os.system('C:/Users/MTIBAA/Anaconda3/envs/test_env/Scripts/ramp_test_submission.exe --submission="%s"' % target)
-
 from __future__ import division
 
 from sklearn.base import BaseEstimator
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
-
 
 class Classifier(BaseEstimator):
     def __init__(self):

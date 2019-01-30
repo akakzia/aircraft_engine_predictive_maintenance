@@ -9,7 +9,8 @@ class FeatureExtractor(object):
         return self
 
     def transform(self, X_df):
-        return _transform(X_df)
+        X_df_new = X_df.copy()
+        return _transform(X_df_new)
 
 
 def _transform(X_df):
